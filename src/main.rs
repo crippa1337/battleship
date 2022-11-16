@@ -30,6 +30,7 @@ impl fmt::Display for Square {
     }
 }
 
+// alternative crate https://crates.io/crates/tabled
 fn board_to_string(board: &[[Square; 10]; 10]) -> String {
     use std::fmt::Write;
     let mut result = String::new();
