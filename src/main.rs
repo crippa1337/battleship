@@ -34,14 +34,21 @@ impl fmt::Display for Square {
 fn board_to_string(board: &[[Square; 10]; 10]) -> String {
     use std::fmt::Write;
     let mut result = String::new();
-    write!(result, "+ A + B + C + D + E + F + G + H + I + J +\n",).unwrap();
+    let mut row_id = -1;
+    write!(result, "  + A + B + C + D + E + F + G + H + I + J +\n",).unwrap();
     for row in board {
-        write!(result, "+---+---+---+---+---+---+---+---+---+---+\n",).unwrap();
+        row_id += 1;
+        write!(
+            result,
+            "  +---+---+---+---+---+---+---+---+---+---+\n{} ",
+            row_id
+        )
+        .unwrap();
         for square in row {
             write!(result, "| {} ", square).unwrap();
         }
         write!(result, "|\n").unwrap();
     }
-    write!(result, "+---+---+---+---+---+---+---+---+---+---+",).unwrap();
+    write!(result, "  +---+---+---+---+---+---+---+---+---+---+",).unwrap();
     result
 }
