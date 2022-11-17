@@ -2,15 +2,15 @@ use std::{collections::HashMap, io::stdin};
 fn main() {
     let mut player_arr = [[Square::Empty; 10]; 10];
     let mut comp_arr = [[Square::Empty; 10]; 10];
-    print_board(&player_arr);
+    print_board(&player_arr, false);
 
     loop {
         let mut input = String::new();
         stdin().read_line(&mut input).unwrap();
-        let new_cord = convert_input_to_array(input);
-        player_arr[new_cord[1]][new_cord[0]] = Square::Ship;
+        let cord = convert_input_to_array(input);
+        player_arr[cord[1]][cord[0]] = Square::Ship;
         clear_screen();
-        print_board(&player_arr);
+        print_board(&player_arr, false);
     }
 }
 
@@ -26,9 +26,8 @@ enum Square {
     Ship,
 }
 
-fn print_board(board: &[[Square; 10]; 10]) {
+fn print_board(board: &[[Square; 10]; 10], comp_board: bool) {
     use ansi_term::Color::{Cyan, Red, RGB};
-    let mut row_id: i8 = -1;
 
     println!("      A   B   C   D   E   F   G   H   I   J");
     for (row_id, row) in board.iter().enumerate() {
@@ -43,7 +42,13 @@ fn print_board(board: &[[Square; 10]; 10]) {
                 Square::Empty => print!("  "),
                 Square::Shot => print!("{}", Cyan.paint("O ")),
                 Square::Hit => print!("{}", Red.bold().paint("X ")),
-                Square::Ship => print!("# "),
+                Square::Ship => {
+                    if comp_board {
+                        print!("  ")
+                    } else {
+                        print!("# ")
+                    }
+                }
             }
         }
         println!("{}", RGB(100, 100, 100).paint("|"));
@@ -69,10 +74,10 @@ fn convert_input_to_array(input: String) -> Vec<usize> {
     ]);
     let buf = input.to_lowercase();
     let input = buf.trim();
-    let input: Vec<&str> = input.split_whitespace().collect();
-    let x = map.get(input[0]).unwrap();
-    let x = *x as usize;
-    let y = input[1].parse::<usize>().unwrap();
-    let coordinate = vec![x, y];
-    coordinate
+    let input: Vec<char> = input.chars().collect();
+    print!("{:?}", input);
+    let mut new_cord = Vec::new();
+    new_cord.push(map[&input[0].to_string()] as usize);
+    new_cord.push(input[1].to_digit(10).unwrap() as usize);
+    new_cord
 }
