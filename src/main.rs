@@ -1,10 +1,21 @@
-use std::io::stdin;
+use std::{collections::HashMap, io::stdin};
 fn main() {
-    let mut arr = [[Square::Empty; 10]; 10];
-    print_board(&arr);
+    let mut player_arr = [[Square::Empty; 10]; 10];
+    let mut comp_arr = [[Square::Empty; 10]; 10];
+    print_board(&player_arr);
 
-    let mut buf = String::new();
-    stdin().read_line(&mut buf).unwrap();
+    loop {
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+        let new_cord = convert_input_to_array(input);
+        player_arr[new_cord[1]][new_cord[0]] = Square::Ship;
+        clear_screen();
+        print_board(&player_arr);
+    }
+}
+
+fn clear_screen() {
+    print!("\x1B[2J\x1B[1;1H");
 }
 
 #[derive(Clone, Copy)]
@@ -41,4 +52,27 @@ fn print_board(board: &[[Square; 10]; 10]) {
         "{}",
         RGB(100, 100, 100).paint("    +---+---+---+---+---+---+---+---+---+---+")
     );
+}
+
+fn convert_input_to_array(input: String) -> Vec<usize> {
+    let map: HashMap<String, u8> = HashMap::from([
+        (String::from("a"), 0),
+        (String::from("b"), 1),
+        (String::from("c"), 2),
+        (String::from("d"), 3),
+        (String::from("e"), 4),
+        (String::from("f"), 5),
+        (String::from("g"), 6),
+        (String::from("h"), 7),
+        (String::from("i"), 8),
+        (String::from("j"), 9),
+    ]);
+    let buf = input.to_lowercase();
+    let input = buf.trim();
+    let input: Vec<&str> = input.split_whitespace().collect();
+    let x = map.get(input[0]).unwrap();
+    let x = *x as usize;
+    let y = input[1].parse::<usize>().unwrap();
+    let coordinate = vec![x, y];
+    coordinate
 }
