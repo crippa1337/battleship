@@ -1,54 +1,44 @@
 use std::io::stdin;
 fn main() {
-    let arr = [[Square::Empty; 10]; 10];
-    println!("{}", board_to_string(&arr));
+    let mut arr = [[Square::Empty; 10]; 10];
+    print_board(&arr);
+
     let mut buf = String::new();
-    stdin().read_line(&mut buf).expect("Failed to read input");
+    stdin().read_line(&mut buf).unwrap();
 }
 
 #[derive(Clone, Copy)]
 enum Square {
     Empty,
-    Miss,
+    Shot,
     Hit,
     Ship,
 }
 
-use std::fmt;
-impl fmt::Display for Square {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Square::Empty => " ",
-                Square::Miss => "O",
-                Square::Hit => "X",
-                Square::Ship => "#",
-            }
-        )
-    }
-}
+fn print_board(board: &[[Square; 10]; 10]) {
+    use ansi_term::Color::{Cyan, Red, RGB};
+    let mut row_id: i8 = -1;
 
-// alternative crate https://crates.io/crates/tabled
-fn board_to_string(board: &[[Square; 10]; 10]) -> String {
-    use std::fmt::Write;
-    let mut result = String::new();
-    let mut row_id = -1;
-    write!(result, "  + A + B + C + D + E + F + G + H + I + J +\n",).unwrap();
-    for row in board {
-        row_id += 1;
-        write!(
-            result,
-            "  +---+---+---+---+---+---+---+---+---+---+\n{} ",
+    println!("      A   B   C   D   E   F   G   H   I   J");
+    for (row_id, row) in board.iter().enumerate() {
+        print!(
+            "{}\n {}  ",
+            RGB(100, 100, 100).paint("    +---+---+---+---+---+---+---+---+---+---+"),
             row_id
-        )
-        .unwrap();
-        for square in row {
-            write!(result, "| {} ", square).unwrap();
+        );
+        for &square in row {
+            print!("{}", RGB(100, 100, 100).paint("| "));
+            match square {
+                Square::Empty => print!("  "),
+                Square::Shot => print!("{}", Cyan.paint("O ")),
+                Square::Hit => print!("{}", Red.bold().paint("X ")),
+                Square::Ship => print!("# "),
+            }
         }
-        write!(result, "|\n").unwrap();
+        println!("{}", RGB(100, 100, 100).paint("|"));
     }
-    write!(result, "  +---+---+---+---+---+---+---+---+---+---+",).unwrap();
-    result
+    println!(
+        "{}",
+        RGB(100, 100, 100).paint("    +---+---+---+---+---+---+---+---+---+---+")
+    );
 }
