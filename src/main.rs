@@ -3,14 +3,48 @@ fn main() {
     let mut player_arr = [[Square::Empty; 10]; 10];
     let mut comp_arr = [[Square::Empty; 10]; 10];
     print_board(&player_arr, false);
+    println!("--------------------------------------\nINPUT IS TAKEN AS SUCH: [CHAR][INDEX]\nSUCH AS: a6, B7, j3\n--------------------------------------");
 
     loop {
-        let mut input = String::new();
-        stdin().read_line(&mut input).unwrap();
+        let input = take_cord_input(true);
         let cord = convert_input_to_array(input);
         player_arr[cord[1]][cord[0]] = Square::Ship;
-        print_board(&player_arr, false);
         clear_screen();
+        print_board(&player_arr, false);
+    }
+}
+
+fn take_cord_input(ship_place: bool) -> String {
+    if ship_place {
+        println!("Place your ships");
+    } else {
+        println!("Take a shot");
+    }
+    loop {
+        let mut input = String::new();
+
+        loop {
+            input.clear();
+            stdin().read_line(&mut input).unwrap();
+            input = input.trim().to_string();
+            if input.len() == 2 {
+                let mut tuple: (char, u8) = (' ', 0);
+                for (i, c) in input.chars().enumerate() {
+                    if i == 0 && c.is_ascii_alphabetic() {
+                        tuple.0 = c;
+                        return input;
+                    } else if i == 1 && c.is_digit(10) {
+                        tuple.1 = c as u8;
+                        return input;
+                    } else {
+                        println!("'{}' is an invalid input", input);
+                        break;
+                    }
+                }
+            } else {
+                println!("'{}' is an invalid input", input);
+            }
+        }
     }
 }
 
@@ -79,19 +113,7 @@ fn convert_input_to_array(input: String) -> [usize; 2] {
     let mut input = input.chars();
     let x = input.next().unwrap();
     let y = input.next().unwrap();
-    let x = map.get(&x.to_string());
-    let x = match x {
-        Some(x) => *x,
-        None => 10,
-    };
-    let y = y.to_digit(10);
-    let y = match y {
-        Some(y) => y as usize,
-        None => 10,
-    };
-    match y {
-        0..=9 => y,
-        _ => 10,
-    };
-    [x, y]
+    let x = map.get(&x.to_string()).unwrap();
+    let y = y.to_digit(10).unwrap() as usize;
+    [*x, y]
 }
