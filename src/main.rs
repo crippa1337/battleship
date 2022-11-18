@@ -9,10 +9,12 @@ fn main() {
         stdin().read_line(&mut input).unwrap();
         let cord = convert_input_to_array(input);
         player_arr[cord[1]][cord[0]] = Square::Ship;
-        clear_screen();
         print_board(&player_arr, false);
+        clear_screen();
     }
 }
+
+fn ship_placement() {}
 
 fn clear_screen() {
     print!("\x1B[2J\x1B[1;1H");
@@ -59,8 +61,8 @@ fn print_board(board: &[[Square; 10]; 10], comp_board: bool) {
     );
 }
 
-fn convert_input_to_array(input: String) -> Vec<usize> {
-    let map: HashMap<String, u8> = HashMap::from([
+fn convert_input_to_array(input: String) -> [usize; 2] {
+    let map: HashMap<String, usize> = HashMap::from([
         (String::from("a"), 0),
         (String::from("b"), 1),
         (String::from("c"), 2),
@@ -74,10 +76,22 @@ fn convert_input_to_array(input: String) -> Vec<usize> {
     ]);
     let buf = input.to_lowercase();
     let input = buf.trim();
-    let input: Vec<char> = input.chars().collect();
-    print!("{:?}", input);
-    let mut new_cord = Vec::new();
-    new_cord.push(map[&input[0].to_string()] as usize);
-    new_cord.push(input[1].to_digit(10).unwrap() as usize);
-    new_cord
+    let mut input = input.chars();
+    let x = input.next().unwrap();
+    let y = input.next().unwrap();
+    let x = map.get(&x.to_string());
+    let x = match x {
+        Some(x) => *x,
+        None => 10,
+    };
+    let y = y.to_digit(10);
+    let y = match y {
+        Some(y) => y as usize,
+        None => 10,
+    };
+    match y {
+        0..=9 => y,
+        _ => 10,
+    };
+    [x, y]
 }
