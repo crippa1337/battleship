@@ -26,7 +26,7 @@ fn main() {
     let mut player_arr = [[Square::Empty; 10]; 10];
     let mut comp_arr = [[Square::Empty; 10]; 10];
     print_board(&player_arr, false);
-    println!("--------------------------------------\nINPUT IS TAKEN AS SUCH: <LETTER><NUMBER>\nEXAMPLE: a6, B7, j3\n--------------------------------------");
+    println!("--------------------------------------\nINPUT IS TAKEN AS SUCH: <LETTER><NUMBER>\nEXAMPLE: a6, B7, j3\n--------------------------------------\nShips are 3 tiles wide and are placed from the center of the ship.");
 
     // Initial ship placement
     for i in 1..=6u8 {
@@ -97,40 +97,35 @@ fn input_to_coordinate(input: &String, letters: &HashMap<String, usize>) -> [usi
 }
 
 fn handle_input(letters: &HashMap<String, usize>, rotation: &str) -> [usize; 2] {
-    loop {
+    'error: loop {
         let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+        input = input.trim().to_string();
 
-        loop {
-            input.clear();
-            stdin().read_line(&mut input).unwrap();
-            input = input.trim().to_string();
-            if input.len() == 2 {
-                for (i, c) in input.chars().enumerate() {
+        if input.len() == 2 {
+            for (i, c) in input.chars().enumerate() {
+                if rotation == "vertical" && i == 0 {
+                    continue;
+                } else {
                     if i == 0 && letters.contains_key(&c.to_string()) {
-                        println!("doing the first one trols C={} ROTAION={}", c, rotation);
-                        if rotation == "horizontal" {
-                            if c == 'a' || c == 'j' {
-                                println!("That's out of bounds!");
-                                break;
-                            }
+                        if c == 'a' || c == 'j' {
+                            println!("That's out of bounds!");
+                            continue 'error;
                         }
                     } else if i == 1 && c.is_digit(10) {
-                        println!("SECOND ONE C={} ROTAION={}", c, rotation);
-                        if rotation == "vertical" {
-                            if c == '0' || c == '9' {
-                                println!("That's out of bounds!");
-                                break;
-                            }
+                        if c == '0' || c == '9' {
+                            println!("That's out of bounds!");
+                            continue 'error;
                         }
                     } else {
                         println!("'{input}' is an invalid input");
-                        break;
+                        continue 'error;
                     }
                 }
                 return input_to_coordinate(&input, &letters);
-            } else {
-                println!("'{input}' is an invalid input");
             }
+        } else {
+            println!("'{input}' is an invalid input");
         }
     }
 }
