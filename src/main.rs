@@ -1,6 +1,15 @@
 use std::{collections::HashMap, io::stdin};
+
+#[derive(Clone, Copy)]
+enum Square {
+    Empty,
+    Shot,
+    Hit,
+    Ship,
+}
+
 fn main() {
-    // create a hashmap with different keys corresponding to different indices on the board
+    // Creates a hashmap with different letters corresponding to different indices on the board
     let letters: HashMap<String, usize> = HashMap::from([
         (String::from("a"), 0),
         (String::from("b"), 1),
@@ -17,13 +26,23 @@ fn main() {
     let mut player_arr = [[Square::Empty; 10]; 10];
     let mut comp_arr = [[Square::Empty; 10]; 10];
     print_board(&player_arr, false);
-    println!("--------------------------------------\nINPUT IS TAKEN AS SUCH: [CHAR][INDEX]\nSUCH AS: a6, B7, j3\n--------------------------------------");
+    println!("--------------------------------------\nINPUT IS TAKEN AS SUCH: <LETTER><NUMBER>\nEXAMPLE: a6, B7, j3\n--------------------------------------");
 
     // Initial ship placement
-    for _ in 0..3 {
-        let input = take_cord_input(true, &letters);
-        let cord = convert_input_to_array(input, &letters);
-        player_arr[cord[1]][cord[0]] = Square::Ship;
+    for i in 1..=6u8 {
+        if i <= 3 {
+            println!("Place Ship #{i}, horizontally.");
+            let cord: [usize; 2] = handle_input(&letters, "horizontal");
+            player_arr[cord[1]][cord[0]] = Square::Ship;
+            player_arr[cord[1]][cord[0] - 1] = Square::Ship;
+            player_arr[cord[1]][cord[0] + 1] = Square::Ship;
+        } else if i >= 4 {
+            println!("Place Ship #{i}, vertically.");
+            let cord: [usize; 2] = handle_input(&letters, "vertical");
+            player_arr[cord[1]][cord[0]] = Square::Ship;
+            player_arr[cord[1] - 1][cord[0]] = Square::Ship;
+            player_arr[cord[1] + 1][cord[0]] = Square::Ship;
+        }
         clear_screen();
         print_board(&player_arr, false);
     }
@@ -31,14 +50,6 @@ fn main() {
 
 fn clear_screen() {
     print!("\x1B[2J\x1B[1;1H");
-}
-
-#[derive(Clone, Copy)]
-enum Square {
-    Empty,
-    Shot,
-    Hit,
-    Ship,
 }
 
 fn print_board(board: &[[Square; 10]; 10], comp_board: bool) {
@@ -74,12 +85,18 @@ fn print_board(board: &[[Square; 10]; 10], comp_board: bool) {
     );
 }
 
-fn take_cord_input(ship_place: bool, letters: &HashMap<String, usize>) -> String {
-    if ship_place {
-        println!("Place your ships");
-    } else {
-        println!("Take a shot");
-    }
+fn input_to_coordinate(input: &String, letters: &HashMap<String, usize>) -> [usize; 2] {
+    let buf = input.trim().to_lowercase();
+    let mut input = buf.chars();
+    let x = input.next().unwrap();
+    let y = input.next().unwrap();
+    let x = letters.get(&x.to_string()).unwrap();
+    let y = y.to_digit(10).unwrap() as usize;
+    // Index 0 is x, index 1 is y
+    return [*x, y];
+}
+
+fn handle_input(letters: &HashMap<String, usize>, rotation: &str) -> [usize; 2] {
     loop {
         let mut input = String::new();
 
@@ -88,34 +105,32 @@ fn take_cord_input(ship_place: bool, letters: &HashMap<String, usize>) -> String
             stdin().read_line(&mut input).unwrap();
             input = input.trim().to_string();
             if input.len() == 2 {
-                let mut tuple: (char, u8) = (' ', 0);
                 for (i, c) in input.chars().enumerate() {
                     if i == 0 && letters.contains_key(&c.to_string()) {
-                        tuple.0 = c;
+                        println!("doing the first one trols C={} ROTAION={}", c, rotation);
+                        if rotation == "horizontal" {
+                            if c == 'a' || c == 'j' {
+                                println!("That's out of bounds!");
+                                break;
+                            }
+                        }
                     } else if i == 1 && c.is_digit(10) {
-                        tuple.1 = c as u8;
-                        return input;
+                        println!("SECOND ONE C={} ROTAION={}", c, rotation);
+                        if rotation == "vertical" {
+                            if c == '0' || c == '9' {
+                                println!("That's out of bounds!");
+                                break;
+                            }
+                        }
                     } else {
                         println!("'{input}' is an invalid input");
                         break;
                     }
                 }
+                return input_to_coordinate(&input, &letters);
             } else {
                 println!("'{input}' is an invalid input");
             }
         }
     }
 }
-
-fn convert_input_to_array(input: String, letters: &HashMap<String, usize>) -> [usize; 2] {
-    let buf = input.to_lowercase();
-    let input = buf.trim();
-    let mut input = input.chars();
-    let x = input.next().unwrap();
-    let y = input.next().unwrap();
-    let x = letters.get(&x.to_string()).unwrap();
-    let y = y.to_digit(10).unwrap() as usize;
-    [*x, y]
-}
-
-fn place_ships(desired_placement: [usize; 2]) {}
