@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io::stdin};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 enum Square {
     Empty,
     Shot,
@@ -32,16 +32,12 @@ fn main() {
     for i in 1..=6u8 {
         if i <= 3 {
             println!("Place Ship #{i}, horizontally.");
-            let cord: [usize; 2] = handle_input(&letters, "horizontal");
-            player_arr[cord[1]][cord[0]] = Square::Ship;
-            player_arr[cord[1]][cord[0] - 1] = Square::Ship;
-            player_arr[cord[1]][cord[0] + 1] = Square::Ship;
+            let cord: [usize; 2] = handle_ship_placement(&letters, "horizontal");
+            create_ship(cord, &mut player_arr, "horizontal");
         } else if i >= 4 {
             println!("Place Ship #{i}, vertically.");
-            let cord: [usize; 2] = handle_input(&letters, "vertical");
-            player_arr[cord[1]][cord[0]] = Square::Ship;
-            player_arr[cord[1] - 1][cord[0]] = Square::Ship;
-            player_arr[cord[1] + 1][cord[0]] = Square::Ship;
+            let cord: [usize; 2] = handle_ship_placement(&letters, "vertical");
+            create_ship(cord, &mut player_arr, "vertical")
         }
         clear_screen();
         print_board(&player_arr, false);
@@ -96,7 +92,7 @@ fn input_to_coordinate(input: &String, letters: &HashMap<String, usize>) -> [usi
     return [*x, y];
 }
 
-fn handle_input(letters: &HashMap<String, usize>, rotation: &str) -> [usize; 2] {
+fn handle_ship_placement(letters: &HashMap<String, usize>, rotation: &str) -> [usize; 2] {
     'error: loop {
         let mut input = String::new();
         stdin().read_line(&mut input).unwrap();
@@ -127,5 +123,17 @@ fn handle_input(letters: &HashMap<String, usize>, rotation: &str) -> [usize; 2] 
         } else {
             println!("'{input}' is an invalid input");
         }
+    }
+}
+
+fn create_ship(cord: [usize; 2], arr: &mut [[Square; 10]; 10], rotation: &str) {
+    if rotation == "horizontal" {
+        arr[cord[1]][cord[0]] = Square::Ship;
+        arr[cord[1]][cord[0] - 1] = Square::Ship;
+        arr[cord[1]][cord[0] + 1] = Square::Ship;
+    } else if rotation == "vertical" {
+        arr[cord[1]][cord[0]] = Square::Ship;
+        arr[cord[1] - 1][cord[0]] = Square::Ship;
+        arr[cord[1] + 1][cord[0]] = Square::Ship;
     }
 }
